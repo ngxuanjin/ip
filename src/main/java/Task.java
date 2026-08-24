@@ -22,4 +22,12 @@ public class Task {
     public String getDescription() {
         return description;
     }
+
+    public String getTypeIcon() {
+        return "T";
+    }
+
+    public String getDetails() {
+        return description;
+    }
 }
