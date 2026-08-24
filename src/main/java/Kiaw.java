@@ -18,9 +18,8 @@ public class Kiaw {
                 if (input.equals("bye")) {
                     System.out.println("Bye. Hope to see you again soon!");
                     break;
-                }
 
-                if (input.equals("list")) {
+                } else if (input.equals("list")) {
                     if (taskCount == 0) {
                         System.out.println("Your task list is empty.");
                     } else {
@@ -28,35 +27,78 @@ public class Kiaw {
 
                         for (int i = 0; i < taskCount; i++) {
                             System.out.println(
-                                    (i + 1) + ".[" + tasks[i].getTypeIcon() + "]"
-                                            + "[" + tasks[i].getStatusIcon() + "] "
+                                    (i + 1) + ".["
+                                            + tasks[i].getTypeIcon()
+                                            + "]["
+                                            + tasks[i].getStatusIcon()
+                                            + "] "
                                             + tasks[i].getDetails()
                             );
                         }
                     }
 
                 } else if (input.startsWith("mark ")) {
-                    int taskNumber = parseTaskNumber(input.substring(5), taskCount);
+                    int taskNumber =
+                            parseTaskNumber(input.substring(5), taskCount);
                     int index = taskNumber - 1;
 
                     tasks[index].markAsDone();
 
-                    System.out.println("Nice! I've marked this task as done:");
                     System.out.println(
-                            "[" + tasks[index].getStatusIcon() + "] "
+                            "Nice! I've marked this task as done:"
+                    );
+                    System.out.println(
+                            "["
+                                    + tasks[index].getStatusIcon()
+                                    + "] "
                                     + tasks[index].getDetails()
                     );
 
                 } else if (input.startsWith("unmark ")) {
-                    int taskNumber = parseTaskNumber(input.substring(7), taskCount);
+                    int taskNumber =
+                            parseTaskNumber(input.substring(7), taskCount);
                     int index = taskNumber - 1;
 
                     tasks[index].markAsNotDone();
 
-                    System.out.println("OK, I've marked this task as not done yet:");
                     System.out.println(
-                            "[" + tasks[index].getStatusIcon() + "] "
+                            "OK, I've marked this task as not done yet:"
+                    );
+                    System.out.println(
+                            "["
+                                    + tasks[index].getStatusIcon()
+                                    + "] "
                                     + tasks[index].getDetails()
+                    );
+
+                } else if (input.startsWith("delete ")) {
+                    int taskNumber =
+                            parseTaskNumber(input.substring(7), taskCount);
+                    int index = taskNumber - 1;
+
+                    String deletedTask =
+                            "["
+                                    + tasks[index].getTypeIcon()
+                                    + "]["
+                                    + tasks[index].getStatusIcon()
+                                    + "] "
+                                    + tasks[index].getDetails();
+
+                    for (int i = index; i < taskCount - 1; i++) {
+                        tasks[i] = tasks[i + 1];
+                    }
+
+                    tasks[taskCount - 1] = null;
+                    taskCount--;
+
+                    System.out.println(
+                            "Noted. I've removed this task:"
+                    );
+                    System.out.println(deletedTask);
+                    System.out.println(
+                            "Now you have "
+                                    + taskCount
+                                    + " tasks in the list."
                     );
 
                 } else if (input.equals("todo")) {
@@ -65,7 +107,8 @@ public class Kiaw {
                     );
 
                 } else if (input.startsWith("todo ")) {
-                    String description = input.substring(5).trim();
+                    String description =
+                            input.substring(5).trim();
 
                     if (description.isEmpty()) {
                         throw new KiawException(
@@ -78,10 +121,16 @@ public class Kiaw {
                     tasks[taskCount] = new Todo(description);
                     taskCount++;
 
-                    System.out.println("Got it. I've added this task:");
-                    System.out.println("[T][ ] " + description);
                     System.out.println(
-                            "Now you have " + taskCount + " tasks in the list."
+                            "Got it. I've added this task:"
+                    );
+                    System.out.println(
+                            "[T][ ] " + description
+                    );
+                    System.out.println(
+                            "Now you have "
+                                    + taskCount
+                                    + " tasks in the list."
                     );
 
                 } else if (input.equals("deadline")) {
@@ -90,9 +139,11 @@ public class Kiaw {
                     );
 
                 } else if (input.startsWith("deadline ")) {
-                    String content = input.substring(9).trim();
+                    String content =
+                            input.substring(9).trim();
 
-                    int separatorIndex = content.indexOf(" /by ");
+                    int separatorIndex =
+                            content.indexOf(" /by ");
 
                     if (separatorIndex == -1) {
                         throw new KiawException(
@@ -120,15 +171,24 @@ public class Kiaw {
 
                     ensureCapacity(taskCount);
 
-                    tasks[taskCount] = new Deadline(description, by);
+                    tasks[taskCount] =
+                            new Deadline(description, by);
                     taskCount++;
 
-                    System.out.println("Got it. I've added this task:");
                     System.out.println(
-                            "[D][ ] " + description + " (by: " + by + ")"
+                            "Got it. I've added this task:"
                     );
                     System.out.println(
-                            "Now you have " + taskCount + " tasks in the list."
+                            "[D][ ] "
+                                    + description
+                                    + " (by: "
+                                    + by
+                                    + ")"
+                    );
+                    System.out.println(
+                            "Now you have "
+                                    + taskCount
+                                    + " tasks in the list."
                     );
 
                 } else if (input.equals("event")) {
@@ -137,10 +197,13 @@ public class Kiaw {
                     );
 
                 } else if (input.startsWith("event ")) {
-                    String content = input.substring(6).trim();
+                    String content =
+                            input.substring(6).trim();
 
-                    int fromIndex = content.indexOf(" /from ");
-                    int toIndex = content.indexOf(" /to ");
+                    int fromIndex =
+                            content.indexOf(" /from ");
+                    int toIndex =
+                            content.indexOf(" /to ");
 
                     if (fromIndex == -1) {
                         throw new KiawException(
@@ -164,7 +227,10 @@ public class Kiaw {
                             content.substring(0, fromIndex).trim();
 
                     String from =
-                            content.substring(fromIndex + 7, toIndex).trim();
+                            content.substring(
+                                    fromIndex + 7,
+                                    toIndex
+                            ).trim();
 
                     String to =
                             content.substring(toIndex + 5).trim();
@@ -189,16 +255,26 @@ public class Kiaw {
 
                     ensureCapacity(taskCount);
 
-                    tasks[taskCount] = new Event(description, from, to);
+                    tasks[taskCount] =
+                            new Event(description, from, to);
                     taskCount++;
 
-                    System.out.println("Got it. I've added this task:");
                     System.out.println(
-                            "[E][ ] " + description
-                                    + " (from: " + from + " to: " + to + ")"
+                            "Got it. I've added this task:"
                     );
                     System.out.println(
-                            "Now you have " + taskCount + " tasks in the list."
+                            "[E][ ] "
+                                    + description
+                                    + " (from: "
+                                    + from
+                                    + " to: "
+                                    + to
+                                    + ")"
+                    );
+                    System.out.println(
+                            "Now you have "
+                                    + taskCount
+                                    + " tasks in the list."
                     );
 
                 } else {
@@ -208,7 +284,9 @@ public class Kiaw {
                 }
 
             } catch (KiawException e) {
-                System.out.println("OOPS!!! " + e.getMessage());
+                System.out.println(
+                        "OOPS!!! " + e.getMessage()
+                );
 
             } catch (NumberFormatException e) {
                 System.out.println(
@@ -217,7 +295,8 @@ public class Kiaw {
 
             } catch (Exception e) {
                 System.out.println(
-                        "OOPS!!! Something went wrong. Please check your command."
+                        "OOPS!!! Something went wrong. "
+                                + "Please check your command."
                 );
             }
         }
@@ -225,13 +304,16 @@ public class Kiaw {
         scanner.close();
     }
 
-    private static int parseTaskNumber(String input, int taskCount)
-            throws KiawException {
+    private static int parseTaskNumber(
+            String input,
+            int taskCount
+    ) throws KiawException {
 
         int taskNumber;
 
         try {
-            taskNumber = Integer.parseInt(input.trim());
+            taskNumber =
+                    Integer.parseInt(input.trim());
         } catch (NumberFormatException e) {
             throw new KiawException(
                     "Please enter a valid task number."
@@ -247,8 +329,9 @@ public class Kiaw {
         return taskNumber;
     }
 
-    private static void ensureCapacity(int taskCount)
-            throws KiawException {
+    private static void ensureCapacity(
+            int taskCount
+    ) throws KiawException {
 
         if (taskCount >= 100) {
             throw new KiawException(
