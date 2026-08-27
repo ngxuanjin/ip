@@ -1,5 +1,8 @@
 package kiaw;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 import kiaw.exception.KiawException;
 import kiaw.parser.ParsedCommand;
 import kiaw.parser.Parser;
@@ -11,11 +14,19 @@ import kiaw.task.TaskList;
 import kiaw.task.Todo;
 import kiaw.ui.Ui;
 
-import java.io.IOException;
-import java.util.ArrayList;
-
+/**
+ * Represents the Kiaw chatbot application.
+ *
+ * Kiaw coordinates user interaction, command parsing, task management,
+ * and persistent storage.
+ */
 public class Kiaw {
 
+    /**
+     * Starts the Kiaw chatbot.
+     *
+     * @param args command-line arguments; currently unused
+     */
     public static void main(String[] args) {
         Ui ui = new Ui();
         Storage storage =
@@ -136,6 +147,12 @@ public class Kiaw {
         ui.close();
     }
 
+    /**
+     * Displays all tasks currently stored in the task list.
+     *
+     * @param tasks task list to display
+     * @param ui user interface used to display the tasks
+     */
     private static void showTaskList(
             TaskList tasks,
             Ui ui
@@ -166,6 +183,16 @@ public class Kiaw {
         }
     }
 
+    /**
+     * Marks the specified task as done and saves the updated task list.
+     *
+     * @param command parsed mark command
+     * @param tasks task list containing the task
+     * @param storage storage used to save the updated task list
+     * @param ui user interface used to display feedback
+     * @throws KiawException if the specified task number does not exist
+     * @throws IOException if the updated task list cannot be saved
+     */
     private static void markTask(
             ParsedCommand command,
             TaskList tasks,
@@ -194,6 +221,16 @@ public class Kiaw {
         );
     }
 
+    /**
+     * Marks the specified task as not done and saves the updated task list.
+     *
+     * @param command parsed unmark command
+     * @param tasks task list containing the task
+     * @param storage storage used to save the updated task list
+     * @param ui user interface used to display feedback
+     * @throws KiawException if the specified task number does not exist
+     * @throws IOException if the updated task list cannot be saved
+     */
     private static void unmarkTask(
             ParsedCommand command,
             TaskList tasks,
@@ -222,6 +259,16 @@ public class Kiaw {
         );
     }
 
+    /**
+     * Deletes the specified task and saves the updated task list.
+     *
+     * @param command parsed delete command
+     * @param tasks task list containing the task
+     * @param storage storage used to save the updated task list
+     * @param ui user interface used to display feedback
+     * @throws KiawException if the specified task number does not exist
+     * @throws IOException if the updated task list cannot be saved
+     */
     private static void deleteTask(
             ParsedCommand command,
             TaskList tasks,
@@ -257,6 +304,15 @@ public class Kiaw {
         );
     }
 
+    /**
+     * Adds a todo task and saves the updated task list.
+     *
+     * @param command parsed todo command
+     * @param tasks task list to update
+     * @param storage storage used to save the updated task list
+     * @param ui user interface used to display feedback
+     * @throws IOException if the updated task list cannot be saved
+     */
     private static void addTodo(
             ParsedCommand command,
             TaskList tasks,
@@ -286,6 +342,15 @@ public class Kiaw {
         );
     }
 
+    /**
+     * Adds a deadline task and saves the updated task list.
+     *
+     * @param command parsed deadline command
+     * @param tasks task list to update
+     * @param storage storage used to save the updated task list
+     * @param ui user interface used to display feedback
+     * @throws IOException if the updated task list cannot be saved
+     */
     private static void addDeadline(
             ParsedCommand command,
             TaskList tasks,
@@ -316,6 +381,15 @@ public class Kiaw {
         );
     }
 
+    /**
+     * Adds an event task and saves the updated task list.
+     *
+     * @param command parsed event command
+     * @param tasks task list to update
+     * @param storage storage used to save the updated task list
+     * @param ui user interface used to display feedback
+     * @throws IOException if the updated task list cannot be saved
+     */
     private static void addEvent(
             ParsedCommand command,
             TaskList tasks,
@@ -347,6 +421,14 @@ public class Kiaw {
         );
     }
 
+    /**
+     * Converts a one-based task number into a zero-based task index.
+     *
+     * @param taskNumber task number supplied by the user
+     * @param tasks current task list
+     * @return zero-based index of the task
+     * @throws KiawException if the task number is outside the task list
+     */
     private static int getTaskIndex(
             int taskNumber,
             TaskList tasks

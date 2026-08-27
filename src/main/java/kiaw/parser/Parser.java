@@ -5,8 +5,18 @@ import java.time.format.DateTimeParseException;
 
 import kiaw.exception.KiawException;
 
+/**
+ * Parses user input into commands that can be executed by Kiaw.
+ */
 public class Parser {
 
+    /**
+     * Parses the user's input into a ParsedCommand.
+     *
+     * @param input user input to parse
+     * @return parsed representation of the command
+     * @throws KiawException if the command is invalid or incomplete
+     */
     public static ParsedCommand parse(String input)
             throws KiawException {
 
@@ -130,6 +140,13 @@ public class Parser {
         );
     }
 
+    /**
+     * Parses a deadline command.
+     *
+     * @param input deadline command entered by the user
+     * @return parsed deadline command
+     * @throws KiawException if the command is malformed or contains an invalid date
+     */
     private static ParsedCommand parseDeadline(String input)
             throws KiawException {
 
@@ -188,6 +205,13 @@ public class Parser {
         );
     }
 
+    /**
+     * Parses an event command.
+     *
+     * @param input event command entered by the user
+     * @return parsed event command
+     * @throws KiawException if the command is malformed or contains invalid dates
+     */
     private static ParsedCommand parseEvent(String input)
             throws KiawException {
 
@@ -283,6 +307,13 @@ public class Parser {
         );
     }
 
+    /**
+     * Parses a task number from user input.
+     *
+     * @param input text containing the task number
+     * @return parsed task number
+     * @throws KiawException if the input is not a valid integer
+     */
     private static int parseTaskNumber(String input)
             throws KiawException {
 
@@ -295,6 +326,12 @@ public class Parser {
         }
     }
 
+    /**
+     * Creates a command that does not require additional arguments.
+     *
+     * @param commandType type of command
+     * @return parsed command containing only its command type
+     */
     private static ParsedCommand createSimpleCommand(
             String commandType
     ) {
