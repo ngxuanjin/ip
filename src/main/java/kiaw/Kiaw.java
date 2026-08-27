@@ -57,6 +57,14 @@ public class Kiaw {
                         showTaskList(tasks, ui);
                         break;
 
+                    case "find":
+                        findTasks(
+                                command,
+                                tasks,
+                                ui
+                        );
+                        break;
+
                     case "mark":
                         markTask(
                                 command,
@@ -361,4 +369,41 @@ public class Kiaw {
 
         return taskNumber - 1;
     }
+
+    private static void findTasks(
+            ParsedCommand command,
+            TaskList tasks,
+            Ui ui
+    ) {
+        String keyword =
+                command.getDescription().toLowerCase();
+
+        ui.showMessage(
+                "Here are the matching tasks in your list:"
+        );
+
+        int matchNumber = 1;
+
+        for (int i = 0; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+
+            if (task.getDescription()
+                    .toLowerCase()
+                    .contains(keyword)) {
+
+                ui.showMessage(
+                        matchNumber
+                                + ".["
+                                + task.getTypeIcon()
+                                + "]["
+                                + task.getStatusIcon()
+                                + "] "
+                                + task.getDetails()
+                );
+
+                matchNumber++;
+            }
+        }
+    }
+
 }

@@ -18,6 +18,31 @@ public class Parser {
             return createSimpleCommand("list");
         }
 
+        if (input.equals("find")) {
+            throw new KiawException(
+                    "Please enter a keyword to search for."
+            );
+        }
+
+        if (input.startsWith("find ")) {
+            String keyword = input.substring(5).trim();
+
+            if (keyword.isEmpty()) {
+                throw new KiawException(
+                        "Please enter a keyword to search for."
+                );
+            }
+
+            return new ParsedCommand(
+                    "find",
+                    keyword,
+                    0,
+                    null,
+                    null,
+                    null
+            );
+        }
+
         if (input.equals("mark")) {
             throw new KiawException(
                     "Please specify which task to mark."

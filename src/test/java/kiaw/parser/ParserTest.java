@@ -119,4 +119,29 @@ public class ParserTest {
                 () -> Parser.parse("blah")
         );
     }
+
+    @Test
+    public void parse_findCommand_parsesKeyword()
+            throws KiawException {
+
+        ParsedCommand command =
+                Parser.parse("find book");
+
+        assertEquals(
+                "find",
+                command.getCommandType()
+        );
+        assertEquals(
+                "book",
+                command.getDescription()
+        );
+    }
+
+    @Test
+    public void parse_findWithoutKeyword_exceptionThrown() {
+        assertThrows(
+                KiawException.class,
+                () -> Parser.parse("find")
+        );
+    }
 }
