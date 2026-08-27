@@ -1,4 +1,6 @@
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -122,8 +124,7 @@ public class Kiaw {
                     );
 
                 } else if (input.startsWith("todo ")) {
-                    String description =
-                            input.substring(5).trim();
+                    String description = input.substring(5).trim();
 
                     if (description.isEmpty()) {
                         throw new KiawException(
@@ -152,8 +153,7 @@ public class Kiaw {
                     );
 
                 } else if (input.startsWith("deadline ")) {
-                    String content =
-                            input.substring(9).trim();
+                    String content = input.substring(9).trim();
 
                     int separatorIndex =
                             content.indexOf(" /by ");
@@ -170,7 +170,7 @@ public class Kiaw {
                                     separatorIndex
                             ).trim();
 
-                    String by =
+                    String byString =
                             content.substring(
                                     separatorIndex + 5
                             ).trim();
@@ -181,9 +181,20 @@ public class Kiaw {
                         );
                     }
 
-                    if (by.isEmpty()) {
+                    if (byString.isEmpty()) {
                         throw new KiawException(
                                 "The /by date of a deadline cannot be empty."
+                        );
+                    }
+
+                    LocalDate by;
+
+                    try {
+                        by = LocalDate.parse(byString);
+                    } catch (DateTimeParseException e) {
+                        throw new KiawException(
+                                "Please enter the deadline date "
+                                        + "in yyyy-MM-dd format."
                         );
                     }
 
@@ -197,10 +208,7 @@ public class Kiaw {
                     );
                     System.out.println(
                             "[D][ ] "
-                                    + description
-                                    + " (by: "
-                                    + by
-                                    + ")"
+                                    + tasks.get(tasks.size() - 1).getDetails()
                     );
                     System.out.println(
                             "Now you have "
@@ -211,12 +219,11 @@ public class Kiaw {
                 } else if (input.equals("event")) {
                     throw new KiawException(
                             "An event needs a description, "
-                                    + "/from time and /to time."
+                                    + "/from date and /to date."
                     );
 
                 } else if (input.startsWith("event ")) {
-                    String content =
-                            input.substring(6).trim();
+                    String content = input.substring(6).trim();
 
                     int fromIndex =
                             content.indexOf(" /from ");
@@ -226,20 +233,20 @@ public class Kiaw {
 
                     if (fromIndex == -1) {
                         throw new KiawException(
-                                "An event must contain a /from time."
+                                "An event must contain a /from date."
                         );
                     }
 
                     if (toIndex == -1) {
                         throw new KiawException(
-                                "An event must contain a /to time."
+                                "An event must contain a /to date."
                         );
                     }
 
                     if (toIndex < fromIndex) {
                         throw new KiawException(
-                                "The /from time must come before "
-                                        + "the /to time."
+                                "The /from date must come before "
+                                        + "the /to date."
                         );
                     }
 
@@ -249,13 +256,13 @@ public class Kiaw {
                                     fromIndex
                             ).trim();
 
-                    String from =
+                    String fromString =
                             content.substring(
                                     fromIndex + 7,
                                     toIndex
                             ).trim();
 
-                    String to =
+                    String toString =
                             content.substring(
                                     toIndex + 5
                             ).trim();
@@ -266,15 +273,35 @@ public class Kiaw {
                         );
                     }
 
-                    if (from.isEmpty()) {
+                    if (fromString.isEmpty()) {
                         throw new KiawException(
-                                "The /from time of an event cannot be empty."
+                                "The /from date of an event cannot be empty."
                         );
                     }
 
-                    if (to.isEmpty()) {
+                    if (toString.isEmpty()) {
                         throw new KiawException(
-                                "The /to time of an event cannot be empty."
+                                "The /to date of an event cannot be empty."
+                        );
+                    }
+
+                    LocalDate from;
+                    LocalDate to;
+
+                    try {
+                        from = LocalDate.parse(fromString);
+                        to = LocalDate.parse(toString);
+                    } catch (DateTimeParseException e) {
+                        throw new KiawException(
+                                "Please enter event dates "
+                                        + "in yyyy-MM-dd format."
+                        );
+                    }
+
+                    if (to.isBefore(from)) {
+                        throw new KiawException(
+                                "The event end date cannot be "
+                                        + "before the start date."
                         );
                     }
 
@@ -292,12 +319,7 @@ public class Kiaw {
                     );
                     System.out.println(
                             "[E][ ] "
-                                    + description
-                                    + " (from: "
-                                    + from
-                                    + " to: "
-                                    + to
-                                    + ")"
+                                    + tasks.get(tasks.size() - 1).getDetails()
                     );
                     System.out.println(
                             "Now you have "
