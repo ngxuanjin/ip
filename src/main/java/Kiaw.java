@@ -1,18 +1,19 @@
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 
 public class Kiaw {
 
     public static void main(String[] args) {
         Ui ui = new Ui();
-        Storage storage = new Storage("data", "kiaw.txt");
+        Storage storage =
+                new Storage("data", "kiaw.txt");
 
         TaskList tasks;
 
         try {
-            ArrayList<Task> loadedTasks = storage.load();
+            ArrayList<Task> loadedTasks =
+                    storage.load();
+
             tasks = new TaskList(loadedTasks);
         } catch (IOException e) {
             ui.showLoadingError();
@@ -21,325 +22,86 @@ public class Kiaw {
 
         ui.showWelcome();
 
-        while (true) {
+        boolean isExit = false;
+
+        while (!isExit) {
             String input = ui.readCommand();
 
             try {
-                if (input.equals("bye")) {
-                    ui.showGoodbye();
-                    break;
-                }
+                ParsedCommand command =
+                        Parser.parse(input);
 
-                if (input.equals("list")) {
-                    if (tasks.isEmpty()) {
-                        ui.showMessage("Your task list is empty.");
-                    } else {
-                        ui.showMessage("Here are the tasks in your list:");
+                String commandType =
+                        command.getCommandType();
 
-                        for (int i = 0; i < tasks.size(); i++) {
-                            Task task = tasks.get(i);
+                switch (commandType) {
+                    case "bye":
+                        ui.showGoodbye();
+                        isExit = true;
+                        break;
 
-                            ui.showMessage(
-                                    (i + 1)
-                                            + ".["
-                                            + task.getTypeIcon()
-                                            + "]["
-                                            + task.getStatusIcon()
-                                            + "] "
-                                            + task.getDetails()
-                            );
-                        }
-                    }
+                    case "list":
+                        showTaskList(tasks, ui);
+                        break;
 
-                } else if (input.startsWith("mark ")) {
-                    int taskNumber = parseTaskNumber(
-                            input.substring(5),
-                            tasks.size()
-                    );
-
-                    int index = taskNumber - 1;
-
-                    tasks.mark(index);
-                    storage.save(tasks.getTasks());
-
-                    Task task = tasks.get(index);
-
-                    ui.showMessage(
-                            "Nice! I've marked this task as done:"
-                    );
-                    ui.showMessage(
-                            "["
-                                    + task.getStatusIcon()
-                                    + "] "
-                                    + task.getDetails()
-                    );
-
-                } else if (input.startsWith("unmark ")) {
-                    int taskNumber = parseTaskNumber(
-                            input.substring(7),
-                            tasks.size()
-                    );
-
-                    int index = taskNumber - 1;
-
-                    tasks.unmark(index);
-                    storage.save(tasks.getTasks());
-
-                    Task task = tasks.get(index);
-
-                    ui.showMessage(
-                            "OK, I've marked this task as not done yet:"
-                    );
-                    ui.showMessage(
-                            "["
-                                    + task.getStatusIcon()
-                                    + "] "
-                                    + task.getDetails()
-                    );
-
-                } else if (input.startsWith("delete ")) {
-                    int taskNumber = parseTaskNumber(
-                            input.substring(7),
-                            tasks.size()
-                    );
-
-                    int index = taskNumber - 1;
-
-                    Task deletedTask = tasks.delete(index);
-                    storage.save(tasks.getTasks());
-
-                    ui.showMessage(
-                            "Noted. I've removed this task:"
-                    );
-                    ui.showMessage(
-                            "["
-                                    + deletedTask.getTypeIcon()
-                                    + "]["
-                                    + deletedTask.getStatusIcon()
-                                    + "] "
-                                    + deletedTask.getDetails()
-                    );
-                    ui.showMessage(
-                            "Now you have "
-                                    + tasks.size()
-                                    + " tasks in the list."
-                    );
-
-                } else if (input.equals("todo")) {
-                    throw new KiawException(
-                            "The description of a todo cannot be empty."
-                    );
-
-                } else if (input.startsWith("todo ")) {
-                    String description = input.substring(5).trim();
-
-                    if (description.isEmpty()) {
-                        throw new KiawException(
-                                "The description of a todo cannot be empty."
+                    case "mark":
+                        markTask(
+                                command,
+                                tasks,
+                                storage,
+                                ui
                         );
-                    }
+                        break;
 
-                    Todo todo = new Todo(description);
-                    tasks.add(todo);
-
-                    storage.save(tasks.getTasks());
-
-                    ui.showMessage(
-                            "Got it. I've added this task:"
-                    );
-                    ui.showMessage(
-                            "[T][ ] " + description
-                    );
-                    ui.showMessage(
-                            "Now you have "
-                                    + tasks.size()
-                                    + " tasks in the list."
-                    );
-
-                } else if (input.equals("deadline")) {
-                    throw new KiawException(
-                            "A deadline needs a description and a /by date."
-                    );
-
-                } else if (input.startsWith("deadline ")) {
-                    String content = input.substring(9).trim();
-
-                    int separatorIndex =
-                            content.indexOf(" /by ");
-
-                    if (separatorIndex == -1) {
-                        throw new KiawException(
-                                "A deadline must contain a /by date."
+                    case "unmark":
+                        unmarkTask(
+                                command,
+                                tasks,
+                                storage,
+                                ui
                         );
-                    }
+                        break;
 
-                    String description =
-                            content.substring(
-                                    0,
-                                    separatorIndex
-                            ).trim();
-
-                    String byString =
-                            content.substring(
-                                    separatorIndex + 5
-                            ).trim();
-
-                    if (description.isEmpty()) {
-                        throw new KiawException(
-                                "The description of a deadline cannot be empty."
+                    case "delete":
+                        deleteTask(
+                                command,
+                                tasks,
+                                storage,
+                                ui
                         );
-                    }
+                        break;
 
-                    if (byString.isEmpty()) {
-                        throw new KiawException(
-                                "The /by date of a deadline cannot be empty."
+                    case "todo":
+                        addTodo(
+                                command,
+                                tasks,
+                                storage,
+                                ui
                         );
-                    }
+                        break;
 
-                    LocalDate by;
-
-                    try {
-                        by = LocalDate.parse(byString);
-                    } catch (DateTimeParseException e) {
-                        throw new KiawException(
-                                "Please enter the deadline date "
-                                        + "in yyyy-MM-dd format."
+                    case "deadline":
+                        addDeadline(
+                                command,
+                                tasks,
+                                storage,
+                                ui
                         );
-                    }
+                        break;
 
-                    Deadline deadline =
-                            new Deadline(description, by);
-
-                    tasks.add(deadline);
-                    storage.save(tasks.getTasks());
-
-                    ui.showMessage(
-                            "Got it. I've added this task:"
-                    );
-                    ui.showMessage(
-                            "[D][ ] " + deadline.getDetails()
-                    );
-                    ui.showMessage(
-                            "Now you have "
-                                    + tasks.size()
-                                    + " tasks in the list."
-                    );
-
-                } else if (input.equals("event")) {
-                    throw new KiawException(
-                            "An event needs a description, "
-                                    + "/from date and /to date."
-                    );
-
-                } else if (input.startsWith("event ")) {
-                    String content = input.substring(6).trim();
-
-                    int fromIndex =
-                            content.indexOf(" /from ");
-
-                    int toIndex =
-                            content.indexOf(" /to ");
-
-                    if (fromIndex == -1) {
-                        throw new KiawException(
-                                "An event must contain a /from date."
+                    case "event":
+                        addEvent(
+                                command,
+                                tasks,
+                                storage,
+                                ui
                         );
-                    }
+                        break;
 
-                    if (toIndex == -1) {
+                    default:
                         throw new KiawException(
-                                "An event must contain a /to date."
+                                "I don't recognise that command."
                         );
-                    }
-
-                    if (toIndex < fromIndex) {
-                        throw new KiawException(
-                                "The /from date must come before "
-                                        + "the /to date."
-                        );
-                    }
-
-                    String description =
-                            content.substring(
-                                    0,
-                                    fromIndex
-                            ).trim();
-
-                    String fromString =
-                            content.substring(
-                                    fromIndex + 7,
-                                    toIndex
-                            ).trim();
-
-                    String toString =
-                            content.substring(
-                                    toIndex + 5
-                            ).trim();
-
-                    if (description.isEmpty()) {
-                        throw new KiawException(
-                                "The description of an event cannot be empty."
-                        );
-                    }
-
-                    if (fromString.isEmpty()) {
-                        throw new KiawException(
-                                "The /from date of an event cannot be empty."
-                        );
-                    }
-
-                    if (toString.isEmpty()) {
-                        throw new KiawException(
-                                "The /to date of an event cannot be empty."
-                        );
-                    }
-
-                    LocalDate from;
-                    LocalDate to;
-
-                    try {
-                        from = LocalDate.parse(fromString);
-                        to = LocalDate.parse(toString);
-                    } catch (DateTimeParseException e) {
-                        throw new KiawException(
-                                "Please enter event dates "
-                                        + "in yyyy-MM-dd format."
-                        );
-                    }
-
-                    if (to.isBefore(from)) {
-                        throw new KiawException(
-                                "The event end date cannot be "
-                                        + "before the start date."
-                        );
-                    }
-
-                    Event event =
-                            new Event(
-                                    description,
-                                    from,
-                                    to
-                            );
-
-                    tasks.add(event);
-                    storage.save(tasks.getTasks());
-
-                    ui.showMessage(
-                            "Got it. I've added this task:"
-                    );
-                    ui.showMessage(
-                            "[E][ ] " + event.getDetails()
-                    );
-                    ui.showMessage(
-                            "Now you have "
-                                    + tasks.size()
-                                    + " tasks in the list."
-                    );
-
-                } else {
-                    throw new KiawException(
-                            "I don't recognise that command."
-                    );
                 }
 
             } catch (KiawException e) {
@@ -352,7 +114,8 @@ public class Kiaw {
 
             } catch (Exception e) {
                 ui.showError(
-                        "Something went wrong. Please check your command."
+                        "Something went wrong. "
+                                + "Please check your command."
                 );
             }
         }
@@ -360,29 +123,229 @@ public class Kiaw {
         ui.close();
     }
 
-    private static int parseTaskNumber(
-            String input,
-            int taskCount
-    ) throws KiawException {
-
-        int taskNumber;
-
-        try {
-            taskNumber =
-                    Integer.parseInt(input.trim());
-        } catch (NumberFormatException e) {
-            throw new KiawException(
-                    "Please enter a valid task number."
+    private static void showTaskList(
+            TaskList tasks,
+            Ui ui
+    ) {
+        if (tasks.isEmpty()) {
+            ui.showMessage(
+                    "Your task list is empty."
             );
+            return;
         }
 
+        ui.showMessage(
+                "Here are the tasks in your list:"
+        );
+
+        for (int i = 0; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+
+            ui.showMessage(
+                    (i + 1)
+                            + ".["
+                            + task.getTypeIcon()
+                            + "]["
+                            + task.getStatusIcon()
+                            + "] "
+                            + task.getDetails()
+            );
+        }
+    }
+
+    private static void markTask(
+            ParsedCommand command,
+            TaskList tasks,
+            Storage storage,
+            Ui ui
+    ) throws KiawException, IOException {
+
+        int index = getTaskIndex(
+                command.getTaskNumber(),
+                tasks
+        );
+
+        tasks.mark(index);
+        storage.save(tasks.getTasks());
+
+        Task task = tasks.get(index);
+
+        ui.showMessage(
+                "Nice! I've marked this task as done:"
+        );
+        ui.showMessage(
+                "["
+                        + task.getStatusIcon()
+                        + "] "
+                        + task.getDetails()
+        );
+    }
+
+    private static void unmarkTask(
+            ParsedCommand command,
+            TaskList tasks,
+            Storage storage,
+            Ui ui
+    ) throws KiawException, IOException {
+
+        int index = getTaskIndex(
+                command.getTaskNumber(),
+                tasks
+        );
+
+        tasks.unmark(index);
+        storage.save(tasks.getTasks());
+
+        Task task = tasks.get(index);
+
+        ui.showMessage(
+                "OK, I've marked this task as not done yet:"
+        );
+        ui.showMessage(
+                "["
+                        + task.getStatusIcon()
+                        + "] "
+                        + task.getDetails()
+        );
+    }
+
+    private static void deleteTask(
+            ParsedCommand command,
+            TaskList tasks,
+            Storage storage,
+            Ui ui
+    ) throws KiawException, IOException {
+
+        int index = getTaskIndex(
+                command.getTaskNumber(),
+                tasks
+        );
+
+        Task deletedTask =
+                tasks.delete(index);
+
+        storage.save(tasks.getTasks());
+
+        ui.showMessage(
+                "Noted. I've removed this task:"
+        );
+        ui.showMessage(
+                "["
+                        + deletedTask.getTypeIcon()
+                        + "]["
+                        + deletedTask.getStatusIcon()
+                        + "] "
+                        + deletedTask.getDetails()
+        );
+        ui.showMessage(
+                "Now you have "
+                        + tasks.size()
+                        + " tasks in the list."
+        );
+    }
+
+    private static void addTodo(
+            ParsedCommand command,
+            TaskList tasks,
+            Storage storage,
+            Ui ui
+    ) throws IOException {
+
+        Todo todo =
+                new Todo(
+                        command.getDescription()
+                );
+
+        tasks.add(todo);
+        storage.save(tasks.getTasks());
+
+        ui.showMessage(
+                "Got it. I've added this task:"
+        );
+        ui.showMessage(
+                "[T][ ] "
+                        + todo.getDetails()
+        );
+        ui.showMessage(
+                "Now you have "
+                        + tasks.size()
+                        + " tasks in the list."
+        );
+    }
+
+    private static void addDeadline(
+            ParsedCommand command,
+            TaskList tasks,
+            Storage storage,
+            Ui ui
+    ) throws IOException {
+
+        Deadline deadline =
+                new Deadline(
+                        command.getDescription(),
+                        command.getDate()
+                );
+
+        tasks.add(deadline);
+        storage.save(tasks.getTasks());
+
+        ui.showMessage(
+                "Got it. I've added this task:"
+        );
+        ui.showMessage(
+                "[D][ ] "
+                        + deadline.getDetails()
+        );
+        ui.showMessage(
+                "Now you have "
+                        + tasks.size()
+                        + " tasks in the list."
+        );
+    }
+
+    private static void addEvent(
+            ParsedCommand command,
+            TaskList tasks,
+            Storage storage,
+            Ui ui
+    ) throws IOException {
+
+        Event event =
+                new Event(
+                        command.getDescription(),
+                        command.getFrom(),
+                        command.getTo()
+                );
+
+        tasks.add(event);
+        storage.save(tasks.getTasks());
+
+        ui.showMessage(
+                "Got it. I've added this task:"
+        );
+        ui.showMessage(
+                "[E][ ] "
+                        + event.getDetails()
+        );
+        ui.showMessage(
+                "Now you have "
+                        + tasks.size()
+                        + " tasks in the list."
+        );
+    }
+
+    private static int getTaskIndex(
+            int taskNumber,
+            TaskList tasks
+    ) throws KiawException {
+
         if (taskNumber < 1
-                || taskNumber > taskCount) {
+                || taskNumber > tasks.size()) {
             throw new KiawException(
                     "That task number does not exist."
             );
         }
 
-        return taskNumber;
+        return taskNumber - 1;
     }
 }
