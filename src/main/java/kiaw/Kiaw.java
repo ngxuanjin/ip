@@ -4,11 +4,7 @@ import kiaw.exception.KiawException;
 import kiaw.parser.ParsedCommand;
 import kiaw.parser.Parser;
 import kiaw.storage.Storage;
-import kiaw.task.Deadline;
-import kiaw.task.Event;
-import kiaw.task.Task;
-import kiaw.task.TaskList;
-import kiaw.task.Todo;
+import kiaw.task.*;
 import kiaw.ui.Ui;
 
 import java.io.IOException;
