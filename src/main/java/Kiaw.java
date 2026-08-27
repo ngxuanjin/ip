@@ -2,12 +2,11 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class Kiaw {
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        Ui ui = new Ui();
         Storage storage = new Storage("data", "kiaw.txt");
 
         ArrayList<Task> tasks;
@@ -15,32 +14,29 @@ public class Kiaw {
         try {
             tasks = storage.load();
         } catch (IOException e) {
-            System.out.println(
-                    "OOPS!!! I couldn't load your saved tasks."
-            );
+            ui.showLoadingError();
             tasks = new ArrayList<>();
         }
 
-        System.out.println("Hello! I'm Kiaw.");
-        System.out.println("What can I do for you?");
+        ui.showWelcome();
 
         while (true) {
-            String input = scanner.nextLine().trim();
+            String input = ui.readCommand();
 
             try {
                 if (input.equals("bye")) {
-                    System.out.println("Bye. Hope to see you again soon!");
+                    ui.showGoodbye();
                     break;
                 }
 
                 if (input.equals("list")) {
                     if (tasks.isEmpty()) {
-                        System.out.println("Your task list is empty.");
+                        ui.showMessage("Your task list is empty.");
                     } else {
-                        System.out.println("Here are the tasks in your list:");
+                        ui.showMessage("Here are the tasks in your list:");
 
                         for (int i = 0; i < tasks.size(); i++) {
-                            System.out.println(
+                            ui.showMessage(
                                     (i + 1) + ".["
                                             + tasks.get(i).getTypeIcon()
                                             + "]["
@@ -62,10 +58,10 @@ public class Kiaw {
                     tasks.get(index).markAsDone();
                     storage.save(tasks);
 
-                    System.out.println(
+                    ui.showMessage(
                             "Nice! I've marked this task as done:"
                     );
-                    System.out.println(
+                    ui.showMessage(
                             "[" + tasks.get(index).getStatusIcon()
                                     + "] "
                                     + tasks.get(index).getDetails()
@@ -82,10 +78,10 @@ public class Kiaw {
                     tasks.get(index).markAsNotDone();
                     storage.save(tasks);
 
-                    System.out.println(
+                    ui.showMessage(
                             "OK, I've marked this task as not done yet:"
                     );
-                    System.out.println(
+                    ui.showMessage(
                             "[" + tasks.get(index).getStatusIcon()
                                     + "] "
                                     + tasks.get(index).getDetails()
@@ -102,17 +98,17 @@ public class Kiaw {
                     Task deletedTask = tasks.remove(index);
                     storage.save(tasks);
 
-                    System.out.println(
+                    ui.showMessage(
                             "Noted. I've removed this task:"
                     );
-                    System.out.println(
+                    ui.showMessage(
                             "[" + deletedTask.getTypeIcon()
                                     + "]["
                                     + deletedTask.getStatusIcon()
                                     + "] "
                                     + deletedTask.getDetails()
                     );
-                    System.out.println(
+                    ui.showMessage(
                             "Now you have "
                                     + tasks.size()
                                     + " tasks in the list."
@@ -135,13 +131,13 @@ public class Kiaw {
                     tasks.add(new Todo(description));
                     storage.save(tasks);
 
-                    System.out.println(
+                    ui.showMessage(
                             "Got it. I've added this task:"
                     );
-                    System.out.println(
+                    ui.showMessage(
                             "[T][ ] " + description
                     );
-                    System.out.println(
+                    ui.showMessage(
                             "Now you have "
                                     + tasks.size()
                                     + " tasks in the list."
@@ -203,14 +199,14 @@ public class Kiaw {
                     );
                     storage.save(tasks);
 
-                    System.out.println(
+                    ui.showMessage(
                             "Got it. I've added this task:"
                     );
-                    System.out.println(
+                    ui.showMessage(
                             "[D][ ] "
                                     + tasks.get(tasks.size() - 1).getDetails()
                     );
-                    System.out.println(
+                    ui.showMessage(
                             "Now you have "
                                     + tasks.size()
                                     + " tasks in the list."
@@ -314,14 +310,14 @@ public class Kiaw {
                     );
                     storage.save(tasks);
 
-                    System.out.println(
+                    ui.showMessage(
                             "Got it. I've added this task:"
                     );
-                    System.out.println(
+                    ui.showMessage(
                             "[E][ ] "
                                     + tasks.get(tasks.size() - 1).getDetails()
                     );
-                    System.out.println(
+                    ui.showMessage(
                             "Now you have "
                                     + tasks.size()
                                     + " tasks in the list."
@@ -334,24 +330,21 @@ public class Kiaw {
                 }
 
             } catch (KiawException e) {
-                System.out.println(
-                        "OOPS!!! " + e.getMessage()
-                );
+                ui.showError(e.getMessage());
 
             } catch (IOException e) {
-                System.out.println(
-                        "OOPS!!! I couldn't save your tasks."
+                ui.showError(
+                        "I couldn't save your tasks."
                 );
 
             } catch (Exception e) {
-                System.out.println(
-                        "OOPS!!! Something went wrong. "
-                                + "Please check your command."
+                ui.showError(
+                        "Something went wrong. Please check your command."
                 );
             }
         }
 
-        scanner.close();
+        ui.close();
     }
 
     private static int parseTaskNumber(
