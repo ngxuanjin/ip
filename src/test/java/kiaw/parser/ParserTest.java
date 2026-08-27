@@ -1,0 +1,122 @@
+package kiaw.parser;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.time.LocalDate;
+
+import org.junit.jupiter.api.Test;
+
+import kiaw.exception.KiawException;
+
+public class ParserTest {
+
+    @Test
+    public void parse_todoCommand_parsesDescription() throws KiawException {
+        ParsedCommand command = Parser.parse("todo read book");
+
+        assertEquals("todo", command.getCommandType());
+        assertEquals("read book", command.getDescription());
+    }
+
+    @Test
+    public void parse_deadlineCommand_parsesDescriptionAndDate()
+            throws KiawException {
+
+        ParsedCommand command =
+                Parser.parse("deadline submit report /by 2026-09-15");
+
+        assertEquals("deadline", command.getCommandType());
+        assertEquals("submit report", command.getDescription());
+        assertEquals(
+                LocalDate.of(2026, 9, 15),
+                command.getDate()
+        );
+    }
+
+    @Test
+    public void parse_eventCommand_parsesDescriptionAndDates()
+            throws KiawException {
+
+        ParsedCommand command = Parser.parse(
+                "event conference /from 2026-09-20 /to 2026-09-22"
+        );
+
+        assertEquals("event", command.getCommandType());
+        assertEquals("conference", command.getDescription());
+        assertEquals(
+                LocalDate.of(2026, 9, 20),
+                command.getFrom()
+        );
+        assertEquals(
+                LocalDate.of(2026, 9, 22),
+                command.getTo()
+        );
+    }
+
+    @Test
+    public void parse_markCommand_parsesTaskNumber()
+            throws KiawException {
+
+        ParsedCommand command = Parser.parse("mark 3");
+
+        assertEquals("mark", command.getCommandType());
+        assertEquals(3, command.getTaskNumber());
+    }
+
+    @Test
+    public void parse_deleteCommand_parsesTaskNumber()
+            throws KiawException {
+
+        ParsedCommand command = Parser.parse("delete 2");
+
+        assertEquals("delete", command.getCommandType());
+        assertEquals(2, command.getTaskNumber());
+    }
+
+    @Test
+    public void parse_invalidDeadlineDate_exceptionThrown() {
+        assertThrows(
+                KiawException.class,
+                () -> Parser.parse(
+                        "deadline homework /by Friday"
+                )
+        );
+    }
+
+    @Test
+    public void parse_invalidTaskNumber_exceptionThrown() {
+        assertThrows(
+                KiawException.class,
+                () -> Parser.parse("delete abc")
+        );
+    }
+
+    @Test
+    public void parse_eventEndBeforeStart_exceptionThrown() {
+        assertThrows(
+                KiawException.class,
+                () -> Parser.parse(
+                        "event holiday "
+                                + "/from 2026-11-10 "
+                                + "/to 2026-11-01"
+                )
+        );
+    }
+
+    @Test
+    public void parse_emptyTodo_exceptionThrown() {
+        assertThrows(
+                KiawException.class,
+                () -> Parser.parse("todo")
+        );
+    }
+
+    @Test
+    public void parse_unknownCommand_exceptionThrown() {
+        assertThrows(
+                KiawException.class,
+                () -> Parser.parse("blah")
+        );
+    }
+}
