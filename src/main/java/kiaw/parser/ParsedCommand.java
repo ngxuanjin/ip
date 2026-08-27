@@ -1,3 +1,5 @@
+package kiaw.parser;
+
 import java.time.LocalDate;
 
 public class ParsedCommand {
