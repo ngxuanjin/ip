@@ -12,13 +12,30 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Handles loading tasks from and saving tasks to persistent storage.
+ */
 public class Storage {
     private final Path filePath;
 
+    /**
+     * Creates a storage manager for the specified folder and file.
+     *
+     * @param folderName folder containing the data file
+     * @param fileName name of the data file
+     */
     public Storage(String folderName, String fileName) {
         this.filePath = Path.of(folderName, fileName);
     }
 
+    /**
+     * Saves all tasks to the configured data file.
+     *
+     * Creates the parent directory when it does not already exist.
+     *
+     * @param tasks tasks to save
+     * @throws IOException if the tasks cannot be written to the file
+     */
     public void save(ArrayList<Task> tasks) throws IOException {
         Path parentDirectory = filePath.getParent();
 
@@ -35,6 +52,15 @@ public class Storage {
         Files.write(filePath, lines);
     }
 
+    /**
+     * Loads tasks from the configured data file.
+     *
+     * If the directory or file does not exist, it is created and an empty
+     * task list is returned.
+     *
+     * @return tasks loaded from storage
+     * @throws IOException if the data file cannot be read or created
+     */
     public ArrayList<Task> load() throws IOException {
         ArrayList<Task> tasks = new ArrayList<>();
 
@@ -66,6 +92,12 @@ public class Storage {
         return tasks;
     }
 
+    /**
+     * Converts a task into its persistent text representation.
+     *
+     * @param task task to convert
+     * @return text representation suitable for saving
+     */
     private String taskToString(Task task) {
         String status = task.getStatusIcon().equals("X") ? "1" : "0";
 
@@ -99,6 +131,12 @@ public class Storage {
                 + task.getDescription();
     }
 
+    /**
+     * Converts a stored text representation back into a task.
+     *
+     * @param line line read from the data file
+     * @return reconstructed task, or null if the line is invalid
+     */
     private Task stringToTask(String line) {
         String[] parts = line.split(" \\| ");
 
