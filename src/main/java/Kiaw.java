@@ -9,13 +9,14 @@ public class Kiaw {
         Ui ui = new Ui();
         Storage storage = new Storage("data", "kiaw.txt");
 
-        ArrayList<Task> tasks;
+        TaskList tasks;
 
         try {
-            tasks = storage.load();
+            ArrayList<Task> loadedTasks = storage.load();
+            tasks = new TaskList(loadedTasks);
         } catch (IOException e) {
             ui.showLoadingError();
-            tasks = new ArrayList<>();
+            tasks = new TaskList();
         }
 
         ui.showWelcome();
@@ -36,13 +37,16 @@ public class Kiaw {
                         ui.showMessage("Here are the tasks in your list:");
 
                         for (int i = 0; i < tasks.size(); i++) {
+                            Task task = tasks.get(i);
+
                             ui.showMessage(
-                                    (i + 1) + ".["
-                                            + tasks.get(i).getTypeIcon()
+                                    (i + 1)
+                                            + ".["
+                                            + task.getTypeIcon()
                                             + "]["
-                                            + tasks.get(i).getStatusIcon()
+                                            + task.getStatusIcon()
                                             + "] "
-                                            + tasks.get(i).getDetails()
+                                            + task.getDetails()
                             );
                         }
                     }
@@ -55,16 +59,19 @@ public class Kiaw {
 
                     int index = taskNumber - 1;
 
-                    tasks.get(index).markAsDone();
-                    storage.save(tasks);
+                    tasks.mark(index);
+                    storage.save(tasks.getTasks());
+
+                    Task task = tasks.get(index);
 
                     ui.showMessage(
                             "Nice! I've marked this task as done:"
                     );
                     ui.showMessage(
-                            "[" + tasks.get(index).getStatusIcon()
+                            "["
+                                    + task.getStatusIcon()
                                     + "] "
-                                    + tasks.get(index).getDetails()
+                                    + task.getDetails()
                     );
 
                 } else if (input.startsWith("unmark ")) {
@@ -75,16 +82,19 @@ public class Kiaw {
 
                     int index = taskNumber - 1;
 
-                    tasks.get(index).markAsNotDone();
-                    storage.save(tasks);
+                    tasks.unmark(index);
+                    storage.save(tasks.getTasks());
+
+                    Task task = tasks.get(index);
 
                     ui.showMessage(
                             "OK, I've marked this task as not done yet:"
                     );
                     ui.showMessage(
-                            "[" + tasks.get(index).getStatusIcon()
+                            "["
+                                    + task.getStatusIcon()
                                     + "] "
-                                    + tasks.get(index).getDetails()
+                                    + task.getDetails()
                     );
 
                 } else if (input.startsWith("delete ")) {
@@ -95,14 +105,15 @@ public class Kiaw {
 
                     int index = taskNumber - 1;
 
-                    Task deletedTask = tasks.remove(index);
-                    storage.save(tasks);
+                    Task deletedTask = tasks.delete(index);
+                    storage.save(tasks.getTasks());
 
                     ui.showMessage(
                             "Noted. I've removed this task:"
                     );
                     ui.showMessage(
-                            "[" + deletedTask.getTypeIcon()
+                            "["
+                                    + deletedTask.getTypeIcon()
                                     + "]["
                                     + deletedTask.getStatusIcon()
                                     + "] "
@@ -128,8 +139,10 @@ public class Kiaw {
                         );
                     }
 
-                    tasks.add(new Todo(description));
-                    storage.save(tasks);
+                    Todo todo = new Todo(description);
+                    tasks.add(todo);
+
+                    storage.save(tasks.getTasks());
 
                     ui.showMessage(
                             "Got it. I've added this task:"
@@ -194,17 +207,17 @@ public class Kiaw {
                         );
                     }
 
-                    tasks.add(
-                            new Deadline(description, by)
-                    );
-                    storage.save(tasks);
+                    Deadline deadline =
+                            new Deadline(description, by);
+
+                    tasks.add(deadline);
+                    storage.save(tasks.getTasks());
 
                     ui.showMessage(
                             "Got it. I've added this task:"
                     );
                     ui.showMessage(
-                            "[D][ ] "
-                                    + tasks.get(tasks.size() - 1).getDetails()
+                            "[D][ ] " + deadline.getDetails()
                     );
                     ui.showMessage(
                             "Now you have "
@@ -301,21 +314,21 @@ public class Kiaw {
                         );
                     }
 
-                    tasks.add(
+                    Event event =
                             new Event(
                                     description,
                                     from,
                                     to
-                            )
-                    );
-                    storage.save(tasks);
+                            );
+
+                    tasks.add(event);
+                    storage.save(tasks.getTasks());
 
                     ui.showMessage(
                             "Got it. I've added this task:"
                     );
                     ui.showMessage(
-                            "[E][ ] "
-                                    + tasks.get(tasks.size() - 1).getDetails()
+                            "[E][ ] " + event.getDetails()
                     );
                     ui.showMessage(
                             "Now you have "
