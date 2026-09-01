@@ -7,7 +7,11 @@ import kiaw.exception.KiawException;
 import kiaw.parser.ParsedCommand;
 import kiaw.parser.Parser;
 import kiaw.storage.Storage;
-import kiaw.task.*;
+import kiaw.task.Deadline;
+import kiaw.task.Event;
+import kiaw.task.Task;
+import kiaw.task.TaskList;
+import kiaw.task.Todo;
 import kiaw.ui.Ui;
 
 /**
@@ -175,15 +179,13 @@ public class Kiaw {
         for (int i = 0; i < tasks.size(); i++) {
             Task task = tasks.get(i);
 
-            ui.showMessage(
-                    (i + 1)
-                            + ".["
-                            + task.getTypeIcon()
-                            + "]["
-                            + task.getStatusIcon()
-                            + "] "
-                            + task.getDetails()
-            );
+            ui.showMessage((i + 1)
+                    + ".["
+                    + task.getTypeIcon()
+                    + "]["
+                    + task.getStatusIcon()
+                    + "] "
+                    + task.getDetails());
         }
     }
 
