@@ -1,0 +1,87 @@
+package kiaw.ui;
+
+import javafx.animation.PauseTransition;
+import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
+import javafx.util.Duration;
+import kiaw.Kiaw;
+
+/**
+ * Controller for Kiaw's main GUI.
+ */
+public class MainWindow extends AnchorPane {
+
+    @FXML
+    private ScrollPane scrollPane;
+
+    @FXML
+    private VBox dialogContainer;
+
+    @FXML
+    private TextField userInput;
+
+    @FXML
+    private Button sendButton;
+
+    private Kiaw kiaw;
+
+    private final Image userImage =
+            new Image(this.getClass().getResourceAsStream(
+                    "/images/DaUser.png"));
+
+    private final Image kiawImage =
+            new Image(this.getClass().getResourceAsStream(
+                    "/images/DaKiaw.png"));
+
+    /**
+     * Initializes the main window after its FXML components are loaded.
+     */
+    @FXML
+    public void initialize() {
+        scrollPane.vvalueProperty().bind(
+                dialogContainer.heightProperty());
+    }
+
+    /**
+     * Injects the Kiaw instance used to process commands.
+     *
+     * @param kiaw Kiaw instance
+     */
+    public void setKiaw(Kiaw kiaw) {
+        this.kiaw = kiaw;
+    }
+
+    /**
+     * Processes the user's input and displays Kiaw's response.
+     */
+    @FXML
+    private void handleUserInput() {
+        String input = userInput.getText().trim();
+
+        if (input.isEmpty()) {
+            return;
+        }
+
+        String response = kiaw.getResponse(input);
+
+        dialogContainer.getChildren().addAll(
+                DialogBox.getUserDialog(input, userImage),
+                DialogBox.getKiawDialog(response, kiawImage));
+
+        userInput.clear();
+
+        if (input.equals("bye")) {
+            PauseTransition delay =
+                    new PauseTransition(Duration.seconds(1.5));
+
+            delay.setOnFinished(event -> Platform.exit());
+            delay.play();
+        }
+    }
+}
