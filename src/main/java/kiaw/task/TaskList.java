@@ -21,6 +21,7 @@ public class TaskList {
      * @param tasks initial tasks
      */
     public TaskList(ArrayList<Task> tasks) {
+        assert tasks != null : "Initial task list should not be null";
         this.tasks = tasks;
     }
 
@@ -30,6 +31,7 @@ public class TaskList {
      * @param task task to add
      */
     public void add(Task task) {
+        assert task != null : "Task to add should not be null";
         tasks.add(task);
     }
 
@@ -40,6 +42,7 @@ public class TaskList {
      * @return task at the specified index
      */
     public Task get(int index) {
+        assert isValidIndex(index) : "Task index should be valid";
         return tasks.get(index);
     }
 
@@ -50,6 +53,7 @@ public class TaskList {
      * @return deleted task
      */
     public Task delete(int index) {
+        assert isValidIndex(index) : "Task index should be valid";
         return tasks.remove(index);
     }
 
@@ -59,6 +63,7 @@ public class TaskList {
      * @param index zero-based task index
      */
     public void mark(int index) {
+        assert isValidIndex(index) : "Task index should be valid";
         tasks.get(index).markAsDone();
     }
 
@@ -68,6 +73,7 @@ public class TaskList {
      * @param index zero-based task index
      */
     public void unmark(int index) {
+        assert isValidIndex(index) : "Task index should be valid";
         tasks.get(index).markAsNotDone();
     }
 
@@ -98,5 +104,15 @@ public class TaskList {
      */
     public ArrayList<Task> getTasks() {
         return tasks;
+    }
+
+    /**
+     * Checks whether an index refers to an existing task.
+     *
+     * @param index zero-based task index
+     * @return true if the index is valid
+     */
+    private boolean isValidIndex(int index) {
+        return index >= 0 && index < tasks.size();
     }
 }

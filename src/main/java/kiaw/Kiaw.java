@@ -354,6 +354,11 @@ public class Kiaw {
                     "That task number does not exist.");
         }
 
-        return taskNumber - 1;
+        int index = taskNumber - 1;
+
+        assert index >= 0 && index < tasks.size()
+                : "Validated task number should produce a valid index";
+
+        return index;
     }
 }
