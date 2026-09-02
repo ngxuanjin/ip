@@ -2,6 +2,8 @@ package kiaw;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import kiaw.exception.KiawException;
 import kiaw.parser.ParsedCommand;
@@ -310,33 +312,34 @@ public class Kiaw {
     private String getFindResponse(ParsedCommand command) {
         String keyword = command.getDescription().toLowerCase();
 
-        StringBuilder response =
-                new StringBuilder(
-                        "Here are the matching tasks in your list:");
+        ArrayList<Task> matchingTasks = tasks.getTasks().stream()
+                .filter(task -> task.getDescription()
+                        .toLowerCase()
+                        .contains(keyword))
+                .collect(Collectors.toCollection(ArrayList::new));
 
-        int matchNumber = 1;
+        String matchingTaskLines =
+                IntStream.range(0, matchingTasks.size())
+                        .mapToObj(index -> {
+                            Task task = matchingTasks.get(index);
+                            return (index + 1)
+                                    + ".["
+                                    + task.getTypeIcon()
+                                    + "]["
+                                    + task.getStatusIcon()
+                                    + "] "
+                                    + task.getDetails();
+                        })
+                        .collect(Collectors.joining("\n"));
 
-        for (int i = 0; i < tasks.size(); i++) {
-            Task task = tasks.get(i);
+        String response =
+                "Here are the matching tasks in your list:";
 
-            if (task.getDescription()
-                    .toLowerCase()
-                    .contains(keyword)) {
-
-                response.append("\n")
-                        .append(matchNumber)
-                        .append(".[")
-                        .append(task.getTypeIcon())
-                        .append("][")
-                        .append(task.getStatusIcon())
-                        .append("] ")
-                        .append(task.getDetails());
-
-                matchNumber++;
-            }
+        if (!matchingTaskLines.isEmpty()) {
+            response += "\n" + matchingTaskLines;
         }
 
-        return response.toString();
+        return response;
     }
 
     /**
