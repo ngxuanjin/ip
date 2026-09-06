@@ -1,6 +1,7 @@
 package kiaw.task;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  * Manages the collection of tasks tracked by Kiaw.
@@ -75,6 +76,18 @@ public class TaskList {
     public void unmark(int index) {
         assert isValidIndex(index) : "Task index should be valid";
         tasks.get(index).markAsNotDone();
+    }
+
+    /**
+     * Sorts tasks chronologically, placing tasks without dates last.
+     */
+    public void sortByDate() {
+        tasks.sort(
+                Comparator.comparing(
+                        Task::getSortDate,
+                        Comparator.nullsLast(Comparator.naturalOrder())
+                )
+        );
     }
 
     /**

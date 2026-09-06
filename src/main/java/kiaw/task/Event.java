@@ -72,4 +72,14 @@ public class Event extends Task {
     public LocalDate getTo() {
         return to;
     }
+
+    /**
+     * Returns the event start date used for chronological sorting.
+     *
+     * @return event start date
+     */
+    @Override
+    public LocalDate getSortDate() {
+        return from;
+    }
 }

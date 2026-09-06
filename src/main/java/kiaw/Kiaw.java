@@ -82,6 +82,9 @@ public class Kiaw {
             case "list":
                 return getTaskListResponse();
 
+            case "sort":
+                return getSortResponse();
+
             case "find":
                 return getFindResponse(command);
 
@@ -163,6 +166,29 @@ public class Kiaw {
         }
 
         return response.toString();
+    }
+
+    /**
+     * Sorts tasks chronologically and returns the sorted task list.
+     *
+     * Tasks without dates are placed after dated tasks.
+     *
+     * @return confirmation followed by the sorted task list
+     * @throws IOException if the task list cannot be saved
+     */
+    private String getSortResponse() throws IOException {
+        if (tasks.isEmpty()) {
+            return "Your task list is empty.";
+        }
+
+        tasks.sortByDate();
+        storage.save(tasks.getTasks());
+
+        String taskListResponse = getTaskListResponse();
+        String taskLines = taskListResponse.substring(
+                taskListResponse.indexOf("\n") + 1);
+
+        return "I've sorted your tasks by date:\n" + taskLines;
     }
 
     /**

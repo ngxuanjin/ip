@@ -1,5 +1,7 @@
 package kiaw.task;
 
+import java.time.LocalDate;
+
 /**
  * Represents a task tracked by Kiaw.
  *
@@ -67,5 +69,16 @@ public class Task {
      */
     public String getDetails() {
         return description;
+    }
+
+    /**
+     * Returns the date used to sort this task chronologically.
+     *
+     * Tasks without an associated date return null.
+     *
+     * @return date used for sorting, or null if the task has no date
+     */
+    public LocalDate getSortDate() {
+        return null;
     }
 }
