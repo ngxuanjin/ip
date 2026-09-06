@@ -54,4 +54,14 @@ public class Deadline extends Task {
     public LocalDate getBy() {
         return by;
     }
+
+    /**
+     * Returns the deadline date used for chronological sorting.
+     *
+     * @return deadline due date
+     */
+    @Override
+    public LocalDate getSortDate() {
+        return by;
+    }
 }

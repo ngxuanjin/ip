@@ -94,4 +94,16 @@ public class ParserTest {
     public void parse_findWithoutKeyword_exceptionThrown() {
         assertThrows(KiawException.class, () -> Parser.parse("find"));
     }
+
+    @Test
+    public void parse_sortCommand_parsesCommand() throws KiawException {
+        ParsedCommand command = Parser.parse("sort");
+
+        assertEquals("sort", command.getCommandType());
+    }
+
+    @Test
+    public void parse_sortWithArgument_exceptionThrown() {
+        assertThrows(KiawException.class, () -> Parser.parse("sort date"));
+    }
 }

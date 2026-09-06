@@ -28,6 +28,10 @@ public class Parser {
             return createSimpleCommand("list");
         }
 
+        if (input.equals("sort")) {
+            return createSimpleCommand("sort");
+        }
+
         if (input.equals("find")) {
             throw new KiawException(
                     "Please enter a keyword to search for."
