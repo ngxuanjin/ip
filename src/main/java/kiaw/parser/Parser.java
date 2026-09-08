@@ -20,6 +20,18 @@ public class Parser {
     public static ParsedCommand parse(String input)
             throws KiawException {
 
+        if (input == null) {
+            throw new KiawException(
+                    "Please enter a command.");
+        }
+
+        input = input.trim();
+
+        if (input.isEmpty()) {
+            throw new KiawException(
+                    "Please enter a command.");
+        }
+
         if (input.equals("bye")) {
             return createSimpleCommand("bye");
         }
@@ -181,6 +193,12 @@ public class Parser {
 
         String content = input.substring(9).trim();
 
+        if (countOccurrences(content, " /by ") > 1) {
+            throw new KiawException(
+                    "A deadline can only have one /by date."
+            );
+        }
+
         int separatorIndex =
                 content.indexOf(" /by ");
 
@@ -245,6 +263,18 @@ public class Parser {
             throws KiawException {
 
         String content = input.substring(6).trim();
+
+        if (countOccurrences(content, " /from ") > 1) {
+            throw new KiawException(
+                    "An event can only have one /from date."
+            );
+        }
+
+        if (countOccurrences(content, " /to ") > 1) {
+            throw new KiawException(
+                    "An event can only have one /to date."
+            );
+        }
 
         int fromIndex =
                 content.indexOf(" /from ");
@@ -353,6 +383,27 @@ public class Parser {
                     "Please enter a valid task number."
             );
         }
+    }
+
+    /**
+     * Counts the number of occurrences of a substring.
+     *
+     * @param text text to search
+     * @param target substring to count
+     * @return number of occurrences
+     */
+    private static int countOccurrences(
+            String text, String target) {
+
+        int count = 0;
+        int index = 0;
+
+        while ((index = text.indexOf(target, index)) != -1) {
+            count++;
+            index += target.length();
+        }
+
+        return count;
     }
 
     /**

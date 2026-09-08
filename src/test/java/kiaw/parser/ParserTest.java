@@ -106,4 +106,53 @@ public class ParserTest {
     public void parse_sortWithArgument_exceptionThrown() {
         assertThrows(KiawException.class, () -> Parser.parse("sort date"));
     }
+
+    @Test
+    public void parse_commandWithSurroundingSpaces_commandParsed()
+            throws KiawException {
+
+        ParsedCommand command = Parser.parse("   list   ");
+
+        assertEquals("list", command.getCommandType());
+    }
+
+    @Test
+    public void parse_markWithMultipleSpaces_taskNumberParsed()
+            throws KiawException {
+
+        ParsedCommand command = Parser.parse("mark      2");
+
+        assertEquals("mark", command.getCommandType());
+        assertEquals(2, command.getTaskNumber());
+    }
+
+    @Test
+    public void parse_emptyInput_exceptionThrown() {
+        assertThrows(KiawException.class, () -> Parser.parse("   "));
+    }
+
+    @Test
+    public void parse_nullInput_exceptionThrown() {
+        assertThrows(KiawException.class, () -> Parser.parse(null));
+    }
+
+    @Test
+    public void parse_deadlineWithDuplicateBy_exceptionThrown() {
+        assertThrows(KiawException.class, () -> Parser.parse(
+                "deadline homework /by 2026-10-10 /by 2026-11-10"));
+    }
+
+    @Test
+    public void parse_eventWithDuplicateFrom_exceptionThrown() {
+        assertThrows(KiawException.class, () -> Parser.parse(
+                "event meeting /from 2026-10-01 "
+                        + "/from 2026-10-02 /to 2026-10-03"));
+    }
+
+    @Test
+    public void parse_eventWithDuplicateTo_exceptionThrown() {
+        assertThrows(KiawException.class, () -> Parser.parse(
+                "event meeting /from 2026-10-01 "
+                        + "/to 2026-10-02 /to 2026-10-03"));
+    }
 }
