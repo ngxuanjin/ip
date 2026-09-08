@@ -10,12 +10,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 
 /**
- * Represents a dialog box containing a message and the speaker's image.
+ * Represents a dialog box containing a message and the speaker's avatar.
  */
 public class DialogBox extends HBox {
 
@@ -23,15 +22,17 @@ public class DialogBox extends HBox {
     private Label dialog;
 
     @FXML
-    private ImageView displayPicture;
+    private StackPane avatarContainer;
+
+    @FXML
+    private Label avatarText;
 
     /**
-     * Creates a dialog box containing the specified text and image.
+     * Creates a dialog box containing the specified text.
      *
      * @param text message to display
-     * @param image speaker's image
      */
-    private DialogBox(String text, Image image) {
+    private DialogBox(String text) {
         try {
             FXMLLoader fxmlLoader =
                     new FXMLLoader(DialogBox.class.getResource(
@@ -46,11 +47,10 @@ public class DialogBox extends HBox {
         }
 
         dialog.setText(text);
-        displayPicture.setImage(image);
     }
 
     /**
-     * Flips the dialog box so the image appears on the left.
+     * Flips the dialog box so the avatar appears on the left.
      */
     private void flip() {
         ObservableList<Node> children =
@@ -66,29 +66,35 @@ public class DialogBox extends HBox {
      * Creates a dialog box for the user's message.
      *
      * @param text user's message
-     * @param image user's image
      * @return user dialog box
      */
-    public static DialogBox getUserDialog(
-            String text, Image image) {
+    public static DialogBox getUserDialog(String text) {
+        DialogBox dialogBox = new DialogBox(text);
 
-        return new DialogBox(text, image);
+        dialogBox.getStyleClass().add("user-dialog");
+        dialogBox.dialog.getStyleClass().add("user-dialog-label");
+        dialogBox.avatarContainer.getStyleClass().add("user-avatar");
+        dialogBox.avatarText.setText("YOU");
+
+        return dialogBox;
     }
 
     /**
      * Creates a dialog box for Kiaw's response.
      *
      * @param text Kiaw's response
-     * @param image Kiaw's image
      * @return Kiaw dialog box
      */
-    public static DialogBox getKiawDialog(
-            String text, Image image) {
-
-        DialogBox dialogBox =
-                new DialogBox(text, image);
+    public static DialogBox getKiawDialog(String text) {
+        DialogBox dialogBox = new DialogBox(text);
 
         dialogBox.flip();
+        dialogBox.getStyleClass().add("kiaw-dialog");
+        dialogBox.dialog.getStyleClass().add("kiaw-dialog-label");
+        dialogBox.avatarContainer.getStyleClass().add("kiaw-avatar");
+
+        dialogBox.avatarText.setText("✦");
+
         return dialogBox;
     }
 }

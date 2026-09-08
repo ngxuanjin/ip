@@ -6,7 +6,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
@@ -31,14 +30,6 @@ public class MainWindow extends AnchorPane {
 
     private Kiaw kiaw;
 
-    private final Image userImage =
-            new Image(this.getClass().getResourceAsStream(
-                    "/images/DaUser.png"));
-
-    private final Image kiawImage =
-            new Image(this.getClass().getResourceAsStream(
-                    "/images/DaKiaw.png"));
-
     /**
      * Initializes the main window after its FXML components are loaded.
      */
@@ -46,6 +37,12 @@ public class MainWindow extends AnchorPane {
     public void initialize() {
         scrollPane.vvalueProperty().bind(
                 dialogContainer.heightProperty());
+
+        dialogContainer.getChildren().add(
+                DialogBox.getKiawDialog(
+                        "Hi! I'm Kiaw. 👋\n"
+                                + "I can help you manage your tasks.\n"
+                                + "Try adding a todo, deadline, or event."));
     }
 
     /**
@@ -71,8 +68,8 @@ public class MainWindow extends AnchorPane {
         String response = kiaw.getResponse(input);
 
         dialogContainer.getChildren().addAll(
-                DialogBox.getUserDialog(input, userImage),
-                DialogBox.getKiawDialog(response, kiawImage));
+                DialogBox.getUserDialog(input),
+                DialogBox.getKiawDialog(response));
 
         userInput.clear();
 
