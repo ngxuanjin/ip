@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class Storage {
      * Creates a storage manager for the specified folder and file.
      *
      * @param folderName folder containing the data file
-     * @param fileName name of the data file
+     * @param fileName   name of the data file
      */
     public Storage(String folderName, String fileName) {
         this.filePath = Path.of(folderName, fileName);
@@ -30,7 +31,7 @@ public class Storage {
 
     /**
      * Saves all tasks to the configured data file.
-     *
+     * <p>
      * Creates the parent directory when it does not already exist.
      *
      * @param tasks tasks to save
@@ -54,7 +55,7 @@ public class Storage {
 
     /**
      * Loads tasks from the configured data file.
-     *
+     * <p>
      * If the directory or file does not exist, it is created and an empty
      * task list is returned.
      *
@@ -133,6 +134,9 @@ public class Storage {
 
     /**
      * Converts a stored text representation back into a task.
+     * <p>
+     * Invalid or corrupted records are ignored so that other valid tasks
+     * can still be loaded.
      *
      * @param line line read from the data file
      * @return reconstructed task, or null if the line is invalid
@@ -145,44 +149,67 @@ public class Storage {
         }
 
         String type = parts[0];
-        boolean isDone = parts[1].equals("1");
+        String status = parts[1];
         String description = parts[2];
+
+        if (!status.equals("0") && !status.equals("1")) {
+            return null;
+        }
+
+        if (description.isBlank()) {
+            return null;
+        }
 
         Task task;
 
-        switch (type) {
-            case "T":
-                task = new Todo(description);
-                break;
+        try {
+            switch (type) {
+                case "T":
+                    if (parts.length != 3) {
+                        return null;
+                    }
 
-            case "D":
-                if (parts.length < 4) {
+                    task = new Todo(description);
+                    break;
+
+                case "D":
+                    if (parts.length != 4) {
+                        return null;
+                    }
+
+                    task = new Deadline(
+                            description,
+                            LocalDate.parse(parts[3])
+                    );
+                    break;
+
+                case "E":
+                    if (parts.length != 5) {
+                        return null;
+                    }
+
+                    LocalDate from = LocalDate.parse(parts[3]);
+                    LocalDate to = LocalDate.parse(parts[4]);
+
+                    if (to.isBefore(from)) {
+                        return null;
+                    }
+
+                    task = new Event(
+                            description,
+                            from,
+                            to
+                    );
+                    break;
+
+                default:
                     return null;
-                }
-
-                task = new Deadline(
-                        description,
-                        LocalDate.parse(parts[3])
-                );
-                break;
-
-            case "E":
-                if (parts.length < 5) {
-                    return null;
-                }
-
-                task = new Event(
-                        description,
-                        LocalDate.parse(parts[3]),
-                        LocalDate.parse(parts[4])
-                );
-                break;
-
-            default:
-                return null;
+            }
+        } catch (DateTimeParseException e) {
+            return null;
         }
 
-        if (isDone) {
+        if (status.equals("1")) {
             task.markAsDone();
         }
 
