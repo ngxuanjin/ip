@@ -144,75 +144,123 @@ public class Storage {
     private Task stringToTask(String line) {
         String[] parts = line.split(" \\| ");
 
-        if (parts.length < 3) {
+        if (!hasValidCommonFields(parts)) {
             return null;
         }
-
-        String type = parts[0];
-        String status = parts[1];
-        String description = parts[2];
-
-        if (!status.equals("0") && !status.equals("1")) {
-            return null;
-        }
-
-        if (description.isBlank()) {
-            return null;
-        }
-
-        Task task;
 
         try {
-            switch (type) {
-                case "T":
-                    if (parts.length != 3) {
-                        return null;
-                    }
-
-                    task = new Todo(description);
-                    break;
-
-                case "D":
-                    if (parts.length != 4) {
-                        return null;
-                    }
-
-                    task = new Deadline(
-                            description,
-                            LocalDate.parse(parts[3])
-                    );
-                    break;
-
-                case "E":
-                    if (parts.length != 5) {
-                        return null;
-                    }
-
-                    LocalDate from = LocalDate.parse(parts[3]);
-                    LocalDate to = LocalDate.parse(parts[4]);
-
-                    if (to.isBefore(from)) {
-                        return null;
-                    }
-
-                    task = new Event(
-                            description,
-                            from,
-                            to
-                    );
-                    break;
-
-                default:
-                    return null;
-            }
+            Task task = createTask(parts);
+            restoreCompletionStatus(task, parts[1]);
+            return task;
         } catch (DateTimeParseException e) {
             return null;
         }
+    }
 
-        if (status.equals("1")) {
-            task.markAsDone();
+    /**
+     * Checks whether the common fields of a stored task are valid.
+     *
+     * @param parts fields of the stored task
+     * @return true if the common fields are valid
+     */
+    private boolean hasValidCommonFields(String[] parts) {
+        if (parts.length < 3) {
+            return false;
         }
 
-        return task;
+        String status = parts[1];
+        String description = parts[2];
+
+        boolean hasValidStatus =
+                status.equals("0") || status.equals("1");
+
+        return hasValidStatus && !description.isBlank();
+    }
+
+    /**
+     * Creates a task from its stored fields.
+     *
+     * @param parts fields of the stored task
+     * @return reconstructed task, or null if the fields are invalid
+     */
+    private Task createTask(String[] parts) {
+        switch (parts[0]) {
+            case "T":
+                return createTodo(parts);
+            case "D":
+                return createDeadline(parts);
+            case "E":
+                return createEvent(parts);
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Creates a todo from its stored fields.
+     *
+     * @param parts fields of the stored task
+     * @return reconstructed todo, or null if the fields are invalid
+     */
+    private Task createTodo(String[] parts) {
+        if (parts.length != 3) {
+            return null;
+        }
+
+        return new Todo(parts[2]);
+    }
+
+    /**
+     * Creates a deadline from its stored fields.
+     *
+     * @param parts fields of the stored task
+     * @return reconstructed deadline, or null if the fields are invalid
+     */
+    private Task createDeadline(String[] parts) {
+        if (parts.length != 4) {
+            return null;
+        }
+
+        return new Deadline(
+                parts[2],
+                LocalDate.parse(parts[3])
+        );
+    }
+
+    /**
+     * Creates an event from its stored fields.
+     *
+     * @param parts fields of the stored task
+     * @return reconstructed event, or null if the fields are invalid
+     */
+    private Task createEvent(String[] parts) {
+        if (parts.length != 5) {
+            return null;
+        }
+
+        LocalDate from = LocalDate.parse(parts[3]);
+        LocalDate to = LocalDate.parse(parts[4]);
+
+        if (to.isBefore(from)) {
+            return null;
+        }
+
+        return new Event(
+                parts[2],
+                from,
+                to
+        );
+    }
+
+    /**
+     * Restores the completion status of a reconstructed task.
+     *
+     * @param task reconstructed task
+     * @param status stored completion status
+     */
+    private void restoreCompletionStatus(Task task, String status) {
+        if (task != null && status.equals("1")) {
+            task.markAsDone();
+        }
     }
 }
